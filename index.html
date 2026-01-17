@@ -64,17 +64,17 @@
       // Global process shim for the browser environment
       window.process = {
         env: {
-          API_KEY: "" // Will be read from Netlify environment variables if available
+          API_KEY: "" 
         }
       };
 
       window.onerror = function(msg, url, lineNo, columnNo, error) {
-        console.error('EduGrade Error: ', msg, 'at', url, 'line', lineNo);
+        console.error('EduGrade Runtime Error: ', msg, '\nURL: ', url, '\nLine: ', lineNo, '\nError: ', error);
         return false;
       };
     </script>
 
-    <!-- Entry point: transpiled via Babel -->
+    <!-- Entry point: transpiled via Babel. Added explicit presets for React and TypeScript -->
     <script type="text/babel" data-type="module" data-presets="react,typescript" src="index.tsx"></script>
 </body>
 </html>
