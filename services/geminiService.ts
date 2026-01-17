@@ -1,8 +1,8 @@
-
 import { GoogleGenAI, Type } from "@google/genai";
 import { EvaluationReport } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Standard way to access keys in Netlify/Modern environments
+const API_KEY = process.env.API_KEY;
 
 const parseDataUrl = (dataUrl: string) => {
   try {
@@ -22,17 +22,21 @@ export const evaluateAnswerSheet = async (
   keyImages: string[],
   studentImages: string[]
 ): Promise<EvaluationReport> => {
+  if (!API_KEY) {
+    throw new Error("API Key is missing. Please set API_KEY in your environment variables.");
+  }
+
+  const ai = new GoogleGenAI({ apiKey: API_KEY });
   const model = "gemini-3-flash-preview";
 
   const parts: any[] = [
     {
-      text: `You are an expert academic examiner. Grade the student sheets against the provided question paper and answer key.
+      text: `You are an expert academic examiner. Grade the student sheets against the provided question paper and optional answer key.
       
       STRICT RULES:
       1. ABSOLUTE TRUTH: The 'correctAnswer' field MUST represent the objective textbook/syllabus answer. 
-      2. CONSISTENCY: Do not let student errors influence what the 'correctAnswer' is. 
-      3. OCR PRECISION: Transcribe handwritten student answers as accurately as possible in the 'studentAnswer' field.
-      4. FEEDBACK: Be specific about where the student lost marks (e.g., "Missing key formula", "Step 2 calculation error").
+      2. OCR PRECISION: Transcribe handwritten student answers exactly as they appear.
+      3. CRITIQUE: Provide actionable feedback for every single answer.
       
       Return ONLY a JSON object.`
     }
@@ -95,8 +99,12 @@ export const evaluateAnswerSheet = async (
       }
     });
 
-    return JSON.parse(response.text.trim()) as EvaluationReport;
+    const resultText = response.text;
+    if (!resultText) throw new Error("Model returned empty response");
+    
+    return JSON.parse(resultText.trim()) as EvaluationReport;
   } catch (error: any) {
-    throw new Error("Evaluation failed: " + error.message);
+    console.error("Gemini Error:", error);
+    throw new Error("Evaluation failed: " + (error.message || "Unknown error"));
   }
 };
