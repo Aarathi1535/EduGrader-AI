@@ -51,7 +51,7 @@
 </head>
 <body class="bg-[#fcfcfd] text-slate-900 overflow-x-hidden">
     <div id="root">
-        <!-- Initial Loading State to prevent blank screen perception -->
+        <!-- Initial Loading State -->
         <div class="flex items-center justify-center min-h-screen">
             <div class="text-center">
                 <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -61,21 +61,20 @@
     </div>
 
     <script>
-      // Browser-side shim for process.env
+      // Global process shim for the browser environment
       window.process = {
         env: {
-          API_KEY: "" 
+          API_KEY: "" // Will be read from Netlify environment variables if available
         }
       };
 
-      // Error catcher for loading issues
       window.onerror = function(msg, url, lineNo, columnNo, error) {
         console.error('EduGrade Error: ', msg, 'at', url, 'line', lineNo);
         return false;
       };
     </script>
 
-    <!-- Transpile index.tsx and its imports using Babel -->
-    <script type="text/babel" data-type="module" data-presets="react" src="index.tsx"></script>
+    <!-- Entry point: transpiled via Babel -->
+    <script type="text/babel" data-type="module" data-presets="react,typescript" src="index.tsx"></script>
 </body>
 </html>

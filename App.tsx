@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
-import FileUpload from './components/FileUpload';
-import EvaluationReportView from './components/EvaluationReportView';
-import { UploadedFile, EvaluationReport } from './types';
-import { evaluateAnswerSheet } from './services/geminiService';
+import FileUpload from './components/FileUpload.tsx';
+import EvaluationReportView from './components/EvaluationReportView.tsx';
+import { UploadedFile, EvaluationReport } from './types.ts';
+import { evaluateAnswerSheet } from './services/geminiService.ts';
 
-const MAX_FILE_SIZE_MB = 4;
+const MAX_FILE_SIZE_MB = 10; // Increased for high-res PDFs
 
 const App: React.FC = () => {
   const [view, setView] = useState<'dashboard' | 'upload' | 'report'>('dashboard');
@@ -207,13 +206,12 @@ const App: React.FC = () => {
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                       </button>
                     </div>
-                    <h4 className="font-bold text-slate-900 text-lg mb-1 truncate">{item.studentInfo.name}</h4>
-                    <p className="text-slate-400 text-sm font-medium mb-4">{item.studentInfo.subject || 'General'}</p>
+                    <h4 className="font-bold text-slate-900 text-lg mb-1 truncate">{item.studentInfo?.name || 'Unknown Student'}</h4>
+                    <p className="text-slate-400 text-sm font-medium mb-4">{item.studentInfo?.subject || 'General'}</p>
                     <div className="flex justify-between items-center pt-4 border-t border-slate-50 text-xs font-bold text-slate-400 uppercase tracking-widest">
                       <span>{new Date(item.timestamp).toLocaleDateString()}</span>
                       <span className="text-blue-600">View Report →</span>
                     </div>
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50/30 rounded-full blur-2xl -mr-12 -mt-12 group-hover:bg-blue-100/50 transition-colors"></div>
                   </div>
                 ))}
               </div>
@@ -267,8 +265,8 @@ const App: React.FC = () => {
                 )}
               </div>
 
-              <div className="lg:col-span-4 space-y-6">
-                <div className="glass-panel p-8 rounded-[32px] border border-slate-200 shadow-xl">
+              <div className="lg:col-span-4">
+                <div className="glass-panel p-8 rounded-[32px] border border-slate-200 shadow-xl sticky top-28">
                   <h3 className="text-xl font-bold text-slate-900 mb-6">Evaluation Summary</h3>
                   <div className="space-y-4 mb-8">
                     <div className="flex justify-between items-center text-sm font-medium">
