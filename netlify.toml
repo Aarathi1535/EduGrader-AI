@@ -1,6 +1,6 @@
 [build]
   publish = "."
-  command = "" # Completely empty command to stop Netlify from looking for package.json
+  command = ""
 
 [[redirects]]
   from = "/*"
@@ -9,4 +9,4 @@
 
 [build.environment]
   NODE_VERSION = "20"
-  NPM_FLAGS = "--version" # Minor hack to suppress install triggers
+  NPM_FLAGS = "--version"
