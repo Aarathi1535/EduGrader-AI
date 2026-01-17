@@ -1,8 +1,12 @@
 [build]
   publish = "."
-  command = "echo 'No build step required for this simple ESM setup'"
+  command = "" # Completely empty command to stop Netlify from looking for package.json
 
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+
+[build.environment]
+  NODE_VERSION = "20"
+  NPM_FLAGS = "--version" # Minor hack to suppress install triggers

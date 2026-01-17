@@ -1,8 +1,13 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { EvaluationReport } from "../types";
 
-// Standard way to access keys in Netlify/Modern environments
-const API_KEY = process.env.API_KEY;
+const getApiKey = () => {
+  const key = (window as any).process?.env?.API_KEY || (process as any).env?.API_KEY;
+  if (!key) {
+    console.warn("EduGrade: API_KEY not found in window.process.env or process.env.");
+  }
+  return key;
+};
 
 const parseDataUrl = (dataUrl: string) => {
   try {
@@ -22,22 +27,18 @@ export const evaluateAnswerSheet = async (
   keyImages: string[],
   studentImages: string[]
 ): Promise<EvaluationReport> => {
-  if (!API_KEY) {
-    throw new Error("API Key is missing. Please set API_KEY in your environment variables.");
+  const apiKey = getApiKey();
+  
+  if (!apiKey) {
+    throw new Error("Missing API Key. Go to Site Settings > Environment Variables in Netlify and add 'API_KEY'.");
   }
 
-  const ai = new GoogleGenAI({ apiKey: API_KEY });
+  const ai = new GoogleGenAI({ apiKey });
   const model = "gemini-3-flash-preview";
 
   const parts: any[] = [
     {
       text: `You are an expert academic examiner. Grade the student sheets against the provided question paper and optional answer key.
-      
-      STRICT RULES:
-      1. ABSOLUTE TRUTH: The 'correctAnswer' field MUST represent the objective textbook/syllabus answer. 
-      2. OCR PRECISION: Transcribe handwritten student answers exactly as they appear.
-      3. CRITIQUE: Provide actionable feedback for every single answer.
-      
       Return ONLY a JSON object.`
     }
   ];
@@ -100,11 +101,9 @@ export const evaluateAnswerSheet = async (
     });
 
     const resultText = response.text;
-    if (!resultText) throw new Error("Model returned empty response");
-    
+    if (!resultText) throw new Error("Empty AI response");
     return JSON.parse(resultText.trim()) as EvaluationReport;
   } catch (error: any) {
-    console.error("Gemini Error:", error);
     throw new Error("Evaluation failed: " + (error.message || "Unknown error"));
   }
 };
