@@ -1,12 +1,10 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { EvaluationReport } from "../types";
+import { EvaluationReport } from "../types.ts";
 
 const getApiKey = () => {
+  // Priority: Netlify Environment Variable > Window Shim > Process Env
   const key = (window as any).process?.env?.API_KEY || (process as any).env?.API_KEY;
-  if (!key) {
-    console.warn("EduGrade: API_KEY not found in window.process.env or process.env.");
-  }
-  return key;
+  return key || null;
 };
 
 const parseDataUrl = (dataUrl: string) => {
@@ -29,8 +27,10 @@ export const evaluateAnswerSheet = async (
 ): Promise<EvaluationReport> => {
   const apiKey = getApiKey();
   
-  if (!apiKey) {
-    throw new Error("Missing API Key. Go to Site Settings > Environment Variables in Netlify and add 'API_KEY'.");
+  if (!apiKey || apiKey.trim() === "") {
+    throw new Error(
+      "API Key Missing: To fix this, log in to your Netlify dashboard, go to 'Site configuration' > 'Environment variables', add a variable named 'API_KEY' with your Gemini API key, and re-deploy your site."
+    );
   }
 
   const ai = new GoogleGenAI({ apiKey });
@@ -39,7 +39,13 @@ export const evaluateAnswerSheet = async (
   const parts: any[] = [
     {
       text: `You are an expert academic examiner. Grade the student sheets against the provided question paper and optional answer key.
-      Return ONLY a JSON object.`
+      Instructions:
+      1. Identify the student's name and roll number if present.
+      2. Evaluate each question response accurately.
+      3. Provide constructive feedback for each answer.
+      4. If the student answer is missing but a question exists, mark as 0.
+      
+      Return ONLY a JSON object strictly following the schema.`
     }
   ];
 
@@ -101,9 +107,12 @@ export const evaluateAnswerSheet = async (
     });
 
     const resultText = response.text;
-    if (!resultText) throw new Error("Empty AI response");
+    if (!resultText) throw new Error("Empty AI response received.");
     return JSON.parse(resultText.trim()) as EvaluationReport;
   } catch (error: any) {
-    throw new Error("Evaluation failed: " + (error.message || "Unknown error"));
+    if (error.message?.includes("403") || error.message?.includes("API_KEY_INVALID")) {
+      throw new Error("Invalid API Key: Please check that your Gemini API key is correct in your Netlify Environment Variables.");
+    }
+    throw new Error("Evaluation Error: " + (error.message || "An unexpected error occurred during processing."));
   }
 };

@@ -33,6 +33,15 @@
             .page-break-before { page-break-before: always; }
             .page-break-inside-avoid { page-break-inside: avoid; }
         }
+        .animate-shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
     </style>
 
     <script type="importmap">
@@ -51,34 +60,35 @@
 </head>
 <body class="bg-[#fcfcfd] text-slate-900 overflow-x-hidden">
     <div id="root">
-        <!-- Initial Loading State: If this stays visible, a script error occurred -->
+        <!-- Initial Loading State -->
         <div class="flex items-center justify-center min-h-screen">
             <div class="text-center">
                 <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
                 <p class="text-slate-500 font-bold uppercase tracking-widest text-xs">Initializing EduGrade AI...</p>
-                <p id="error-display" class="text-red-500 text-xs mt-4 hidden">Load error detected. Check console.</p>
+                <div id="error-display" class="hidden mt-8 max-w-md mx-auto p-4 bg-red-50 rounded-xl border border-red-100">
+                    <p class="text-red-700 font-bold text-sm">Initialization Failed</p>
+                    <p class="text-red-500 text-xs mt-1">Please check the browser console for details or ensure your internet connection is stable.</p>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-      // Browser-side shim for process.env
+      // Global process shim
       window.process = {
         env: {
           API_KEY: "" 
         }
       };
 
-      // Error catcher for debugging Netlify deployment issues
       window.onerror = function(msg, url, lineNo, columnNo, error) {
         console.error('EduGrade Error: ', msg, 'at', url, 'line', lineNo);
-        const errDisp = document.getElementById('error-display');
-        if (errDisp) errDisp.classList.remove('hidden');
+        const errBox = document.getElementById('error-display');
+        if (errBox) errBox.classList.remove('hidden');
         return false;
       };
     </script>
 
-    <!-- Essential: data-presets must include 'typescript' for .tsx files -->
     <script type="text/babel" data-type="module" data-presets="react,typescript" src="index.tsx"></script>
 </body>
 </html>
